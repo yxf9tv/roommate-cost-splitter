@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roommate Tab Splitter - UVA Edition</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        uvaBlue: '#232D4B',      /* Jefferson Blue */
+                        uvaOrange: '#E57200',    /* Rotunda Orange */
+                        uvaBlueDark: '#171e33',
+                        uvaOrangeHover: '#cc6500'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Holiday Rain Animation (5 Seconds Duration) */
+        @keyframes fallAndSpin {
+            0% {
+                transform: translateY(-12vh) rotate(0deg) scale(0.8);
+                opacity: 1;
+            }
+            80% {
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateY(110vh) rotate(540deg) scale(1.3);
+                opacity: 0;
+            }
+        }
+        
+        .holiday-drop {
+            position: fixed;
+            top: -60px;
+            font-size: 3rem; /* Extra large, symbolic icons */
+            pointer-events: none;
+            z-index: 100;
+            user-select: none;
+            animation: fallAndSpin linear forwards;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
+        }
+
+        /* Dynamic Holiday Theme Background Classes */
+        body { 
+            transition: background-color 0.6s ease-in-out, background-image 0.6s ease-in-out; 
+        }
+        
+        .theme-default { background-color: #f8fafc; }
+        .theme-jan { background: linear-gradient(135deg, #e0f2fe 0%, #38bdf8 100%); } /* New Year / Winter */
+        .theme-feb { background: linear-gradient(135deg, #ffe4e6 0%, #fb7185 100%); } /* Valentine's Day */
+        .theme-mar { background: linear-gradient(135deg, #dcfce7 0%, #4ade80 100%); } /* St. Patrick's Day */
+        .theme-apr { background: linear-gradient(135deg, #fef9c3 0%, #facc15 100%); } /* Easter / Spring */
+        .theme-may { background: linear-gradient(135deg, #fef3c7 0%, #f59e0b 100%); } /* Cinco de Mayo */
+        .theme-jun { background: linear-gradient(135deg, #ffedd5 0%, #fb923c 100%); } /* LGBTQ+ Pride / Summer */
+        .theme-jul { background: linear-gradient(135deg, #fee2e2 0%, #38bdf8 100%); } /* 4th of July */
+        .theme-aug { background: linear-gradient(135deg, #fef3c7 0%, #eab308 100%); } /* Back to School */
+        .theme-sep { background: linear-gradient(135deg, #ffedd5 0%, #f97316 100%); } /* Labor Day / Autumn */
+        .theme-oct { background: linear-gradient(135deg, #ffedd5 0%, #ea580c 100%); } /* Halloween */
+        .theme-nov { background: linear-gradient(135deg, #fef3c7 0%, #d97706 100%); } /* Thanksgiving */
+        .theme-dec { background: linear-gradient(135deg, #dcfce7 0%, #ef4444 100%); } /* Christmas / Holidays */
+    </style>
+</head>
+<body id="appBody" class="theme-default min-h-screen text-slate-800 font-sans p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="text-center space-y-2 bg-uvaBlue text-white p-6 rounded-2xl shadow-lg border-b-4 border-uvaOrange">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-uvaOrange drop-shadow">Roommate Tab Splitter</h1>
+            <p class="text-slate-200 text-sm sm:text-base">Virginia Cavaliers Edition • Track shared expenses & settle up on Venmo ⚔️</p>
+        </header>
+
+        <!-- Step 1: Set Roommate Names & Venmo Handles -->
+        <section class="bg-white p-6 rounded-xl shadow-md border-t-4 border-uvaOrange">
+            <h2 class="text-xl font-bold mb-4 text-uvaBlue flex items-center gap-2">
+                <span class="bg-uvaOrange text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
+                Roommate Names & Venmo Handles
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase">Roommate 1</label>
+                    <input type="text" id="rm1" value="Alex" oninput="updateRoommateNames()" placeholder="Name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-slate-400 text-sm">@</span>
+                        <input type="text" id="venmo1" value="Alex-Hoos" oninput="updateRoommateNames()" placeholder="Venmo handle" class="w-full pl-7 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase">Roommate 2</label>
+                    <input type="text" id="rm2" value="Jordan" oninput="updateRoommateNames()" placeholder="Name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-slate-400 text-sm">@</span>
+                        <input type="text" id="venmo2" value="Jordan-Hoos" oninput="updateRoommateNames()" placeholder="Venmo handle" class="w-full pl-7 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase">Roommate 3</label>
+                    <input type="text" id="rm3" value="Taylor" oninput="updateRoommateNames()" placeholder="Name" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-slate-400 text-sm">@</span>
+                        <input type="text" id="venmo3" value="Taylor-Hoos" oninput="updateRoommateNames()" placeholder="Venmo handle" class="w-full pl-7 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 2: Add Expense -->
+        <section class="bg-white p-6 rounded-xl shadow-md border-t-4 border-uvaBlue">
+            <h2 class="text-xl font-bold mb-4 text-uvaBlue flex items-center gap-2">
+                <span class="bg-uvaBlue text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
+                Add an Expense
+            </h2>
+            <form id="expenseForm" onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
+                <div>
+                    <label for="desc" class="block text-xs font-semibold text-slate-500 uppercase mb-1">Description</label>
+                    <input type="text" id="desc" placeholder="e.g. Bodo's Bagels" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                </div>
+                <div>
+                    <label for="amount" class="block text-xs font-semibold text-slate-500 uppercase mb-1">Amount ($)</label>
+                    <input type="number" step="0.01" id="amount" placeholder="0.00" min="0.01" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300">
+                </div>
+                <div>
+                    <label for="month" class="block text-xs font-semibold text-slate-500 uppercase mb-1">Month</label>
+                    <input type="month" id="month" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300 bg-white">
+                </div>
+                <div>
+                    <label for="payer" class="block text-xs font-semibold text-slate-500 uppercase mb-1">Who Paid?</label>
+                    <select id="payer" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange border-slate-300 bg-white">
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="w-full bg-uvaOrange hover:bg-uvaOrangeHover text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-md">
+                        Add Expense
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Month Filter Controls (Triggers Holiday Background & 5-Second Animation) -->
+        <div class="flex items-center justify-between bg-uvaBlue text-white p-4 rounded-xl shadow border-b-2 border-uvaOrange">
+            <span class="font-bold text-sm flex items-center gap-2">
+                <span>📅</span> Filter Expenses & Settlement:
+            </span>
+            <div class="flex items-center gap-2">
+                <select id="filterMonth" onchange="onFilterMonthChange()" class="px-3 py-1.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-uvaOrange text-slate-800 bg-white text-sm font-semibold cursor-pointer">
+                    <option value="ALL">All Months</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Expenses List Categorized by Month -->
+            <section class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                <h2 class="text-xl font-bold mb-4 text-uvaBlue">Expense Log</h2>
+                <div id="expensesByMonthContainer" class="space-y-4">
+                    <!-- Dynamic expandable month sections will appear here -->
+                </div>
+                <div id="emptyState" class="text-center py-6 text-slate-400 text-sm">
+                    No expenses added yet.
+                </div>
+            </section>
+
+            <!-- Settle Up Summary -->
+            <section class="bg-white p-6 rounded-xl shadow-md border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold mb-4 text-uvaBlue">Who Owes Whom</h2>
+                    <div id="settlementList" class="space-y-3">
+                        <!-- Balances populated dynamically -->
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-400 text-center">
+                    Split equally (1/3 each) per expense.
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        let expenses = [];
+        let openMonths = new Set();
+
+        // Holiday config with symbolic emojis and distinct CSS background classes
+        const holidayThemes = {
+            '01': { class: 'theme-jan', name: '🎉 New Year\'s Day', symbols: ['❄️', '❄️', '☃️', '🎆', '🥂', '🎉'] },
+            '02': { class: 'theme-feb', name: '💘 Valentine\'s Day', symbols: ['💖', '💕', '💘', '🌹', '❤️', '💌'] },
+            '03': { class: 'theme-mar', name: '☘️ St. Patrick\'s Day', symbols: ['☘️', '🍀', '🌈', '🎩', '💚', '🪙'] },
+            '04': { class: 'theme-apr', name: '🐣 Easter & Spring', symbols: ['🐣', '🐰', '🥚', '🌷', '🌸', '🌱'] },
+            '05': { class: 'theme-may', name: '🇲🇽 Cinco de Mayo', symbols: ['🌮', '🪅', '🇲🇽', '🌵', '🥑', '🎺'] },
+            '06': { class: 'theme-jun', name: '🏳️‍🌈 LGBTQ+ Pride & Summer', symbols: ['🏳️‍🌈', '☀️', '🌈', '🍦', '🏖️', '🌻'] },
+            '07': { class: 'theme-jul', name: '🎆 4th of July', symbols: ['🎆', '🎇', '🇺🇸', '🗽', '💥', '🦅'] },
+            '08': { class: 'theme-aug', name: '🎒 Back to School', symbols: ['🎒', '📚', '✏️', '🏫', '🍎', '🎓'] },
+            '09': { class: 'theme-sep', name: '🍂 Labor Day / Fall', symbols: ['🍂', '🍁', '🌾', '☕', '🍎', '🎃'] },
+            '10': { class: 'theme-oct', name: '🎃 Halloween', symbols: ['🎃', '👻', '🦇', '🕷️', '🍬', '🕸️'] },
+            '11': { class: 'theme-nov', name: '🦃 Thanksgiving', symbols: ['🦃', '🥧', '🍂', '🌽', '🍞', '🍁'] },
+            '12': { class: 'theme-dec', name: '🎄 Christmas & Holidays', symbols: ['🎄', '🎅', '🎁', '❄️', '⭐', '🔔'] }
+        };
+
+        window.onload = () => {
+            const today = new Date();
+            const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('month').value = currentMonthStr;
+
+            updateRoommateNames();
+        };
+
+        function getRoommates() {
+            return [
+                {
+                    name: document.getElementById('rm1').value.trim() || 'Roommate 1',
+                    venmo: document.getElementById('venmo1').value.trim().replace(/^@/, '')
+                },
+                {
+                    name: document.getElementById('rm2').value.trim() || 'Roommate 2',
+                    venmo: document.getElementById('venmo2').value.trim().replace(/^@/, '')
+                },
+                {
+                    name: document.getElementById('rm3').value.trim() || 'Roommate 3',
+                    venmo: document.getElementById('venmo3').value.trim().replace(/^@/, '')
+                }
+            ];
+        }
+
+        function updateRoommateNames() {
+            const roommates = getRoommates();
+            const payerSelect = document.getElementById('payer');
+            const selectedPayerIndex = payerSelect.selectedIndex >= 0 ? payerSelect.selectedIndex : 0;
+
+            payerSelect.innerHTML = '';
+            roommates.forEach((rm, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = rm.name;
+                payerSelect.appendChild(option);
+            });
+
+            payerSelect.selectedIndex = Math.min(selectedPayerIndex, roommates.length - 1);
+            renderUI();
+        }
+
+        // Action: Triggered only when selecting a month from the Filter Expenses dropdown
+        function onFilterMonthChange() {
+            const selectedMonth = document.getElementById('filterMonth').value;
+
+            if (selectedMonth === 'ALL') {
+                applyHolidayTheme(null);
+            } else {
+                applyHolidayTheme(selectedMonth);
+                triggerHolidayRain(selectedMonth);
+            }
+
+            renderUI();
+        }
+
+        function applyHolidayTheme(monthKey) {
+            const body = document.getElementById('appBody');
+            body.className = '';
+
+            if (!monthKey) {
+                body.classList.add('theme-default', 'min-h-screen', 'text-slate-800', 'font-sans', 'p-4', 'sm:p-8');
+                return;
+            }
+
+            const monthNumber = monthKey.split('-')[1];
+            const holiday = holidayThemes[monthNumber];
+
+            if (holiday) {
+                body.classList.add(holiday.class, 'min-h-screen', 'text-slate-800', 'font-sans', 'p-4', 'sm:p-8');
+            } else {
+                body.classList.add('theme-default', 'min-h-screen', 'text-slate-800', 'font-sans', 'p-4', 'sm:p-8');
+            }
+        }
+
+        function triggerHolidayRain(monthKey) {
+            if (!monthKey) return;
+            const monthNumber = monthKey.split('-')[1];
+            const holiday = holidayThemes[monthNumber];
+            if (!holiday) return;
+
+            const symbols = holiday.symbols;
+            const numberOfSymbols = 40;
+
+            for (let i = 0; i < numberOfSymbols; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'holiday-drop';
+                drop.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                
+                drop.style.left = `${Math.random() * 95}vw`;
+                
+                // Set animation duration to 5 to 6 seconds per symbol
+                const duration = 5 + Math.random() * 1.5;
+                drop.style.animationDuration = `${duration}s`;
+                
+                // Stagger spawn delays up to 1.5s
+                drop.style.animationDelay = `${Math.random() * 1.5}s`;
+                drop.style.fontSize = `${2.5 + Math.random() * 2}rem`; // Large symbolic icons
+
+                document.body.appendChild(drop);
+
+                // Clean up DOM after animation completes (7.5 seconds safety window)
+                setTimeout(() => { drop.remove(); }, 7500);
+            }
+        }
+
+        function addExpense(e) {
+            e.preventDefault();
+            const descInput = document.getElementById('desc');
+            const amountInput = document.getElementById('amount');
+            const monthInput = document.getElementById('month');
+            const payerSelect = document.getElementById('payer');
+
+            const monthValue = monthInput.value;
+
+            const newExpense = {
+                id: Date.now(),
+                description: descInput.value.trim(),
+                amount: parseFloat(amountInput.value),
+                month: monthValue,
+                payerIndex: parseInt(payerSelect.value)
+            };
+
+            expenses.push(newExpense);
+            openMonths.add(monthValue);
+
+            descInput.value = '';
+            amountInput.value = '';
+            descInput.focus();
+
+            renderUI();
+        }
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(expense => expense.id !== id);
+            renderUI();
+        }
+
+        function toggleMonthExpand(monthKey) {
+            if (openMonths.has(monthKey)) {
+                openMonths.delete(monthKey);
+            } else {
+                openMonths.add(monthKey);
+            }
+            renderUI();
+        }
+
+        function getFilteredExpenses() {
+            const selectedMonth = document.getElementById('filterMonth').value;
+            if (selectedMonth === 'ALL') {
+                return expenses;
+            }
+            return expenses.filter(exp => exp.month === selectedMonth);
+        }
+
+        function calculateBalances(filteredExpenses) {
+            const roommates = getRoommates();
+            const netBalances = [0, 0, 0];
+
+            filteredExpenses.forEach(exp => {
+                const splitAmount = exp.amount / 3;
+                for (let i = 0; i < 3; i++) {
+                    if (i === exp.payerIndex) {
+                        netBalances[i] += (exp.amount - splitAmount);
+                    } else {
+                        netBalances[i] -= splitAmount;
+                    }
+                }
+            });
+
+            let debtors = [];
+            let creditors = [];
+
+            netBalances.forEach((balance, index) => {
+                if (balance < -0.001) {
+                    debtors.push({ index, amount: -balance });
+                } else if (balance > 0.001) {
+                    creditors.push({ index, amount: balance });
+                }
+            });
+
+            const settlements = [];
+            let dIndex = 0;
+            let cIndex = 0;
+
+            while (dIndex < debtors.length && cIndex < creditors.length) {
+                let debtor = debtors[dIndex];
+                let creditor = creditors[cIndex];
+
+                let settlementAmount = Math.min(debtor.amount, creditor.amount);
+
+                settlements.push({
+                    from: roommates[debtor.index].name,
+                    to: roommates[creditor.index].name,
+                    toVenmo: roommates[creditor.index].venmo,
+                    amount: settlementAmount
+                });
+
+                debtor.amount -= settlementAmount;
+                creditor.amount -= settlementAmount;
+
+                if (debtor.amount < 0.001) dIndex++;
+                if (creditor.amount < 0.001) cIndex++;
+            }
+
+            return settlements;
+        }
+
+        function updateMonthFilterDropdown() {
+            const filterMonthSelect = document.getElementById('filterMonth');
+            const currentSelected = filterMonthSelect.value;
+            
+            const uniqueMonths = [...new Set(expenses.map(e => e.month))].sort().reverse();
+
+            filterMonthSelect.innerHTML = '<option value="ALL">All Months</option>';
+            uniqueMonths.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = formatMonthString(m);
+                filterMonthSelect.appendChild(opt);
+            });
+
+            filterMonthSelect.value = currentSelected;
+        }
+
+        function formatMonthString(monthStr) {
+            if (!monthStr) return '';
+            const [year, month] = monthStr.split('-');
+            const date = new Date(year, month - 1);
+            return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        }
+
+        function renderUI() {
+            updateMonthFilterDropdown();
+
+            const roommates = getRoommates();
+            const containerEl = document.getElementById('expensesByMonthContainer');
+            const emptyStateEl = document.getElementById('emptyState');
+            const settlementListEl = document.getElementById('settlementList');
+
+            const activeExpenses = getFilteredExpenses();
+
+            const groupedExpenses = {};
+            activeExpenses.forEach(exp => {
+                if (!groupedExpenses[exp.month]) {
+                    groupedExpenses[exp.month] = [];
+                }
+                groupedExpenses[exp.month].push(exp);
+            });
+
+            containerEl.innerHTML = '';
+
+            if (activeExpenses.length === 0) {
+                emptyStateEl.classList.remove('hidden');
+            } else {
+                emptyStateEl.classList.add('hidden');
+
+                const sortedMonths = Object.keys(groupedExpenses).sort().reverse();
+
+                sortedMonths.forEach(monthKey => {
+                    const isExpanded = openMonths.has(monthKey);
+                    const monthNumber = monthKey.split('-')[1];
+                    const holidayInfo = holidayThemes[monthNumber] || { name: '' };
+
+                    const monthSection = document.createElement('div');
+                    monthSection.className = 'border border-slate-200 rounded-lg overflow-hidden shadow-sm bg-white transition';
+
+                    let tableRows = groupedExpenses[monthKey].map(exp => `
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-2.5 px-3 font-medium text-slate-800">${escapeHtml(exp.description)}</td>
+                            <td class="py-2.5 px-3 text-uvaBlue font-semibold">${escapeHtml(roommates[exp.payerIndex].name)}</td>
+                            <td class="py-2.5 px-3 text-right font-bold text-slate-700">$${exp.amount.toFixed(2)}</td>
+                            <td class="py-2.5 px-3 text-center">
+                                <button onclick="deleteExpense(${exp.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 transition">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    monthSection.innerHTML = `
+                        <button onclick="toggleMonthExpand('${monthKey}')" class="w-full bg-uvaBlue text-white px-4 py-3 font-bold text-sm flex justify-between items-center hover:bg-uvaBlueDark transition">
+                            <span class="flex items-center gap-2">
+                                <span>${isExpanded ? '📂' : '📁'}</span>
+                                <span>${formatMonthString(monthKey)}</span>
+                                <span class="text-xs text-uvaOrange font-normal">(${holidayInfo.name})</span>
+                            </span>
+                            <span class="text-xs bg-uvaOrange px-2 py-0.5 rounded text-white font-medium">
+                                ${isExpanded ? 'Hide Details ▲' : 'Show Details ▼'}
+                            </span>
+                        </button>
+                        ${isExpanded ? `
+                            <div class="overflow-x-auto border-t border-slate-200">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="border-b border-slate-100 text-xs font-semibold text-slate-400 uppercase bg-slate-50">
+                                            <th class="py-2 px-3">Description</th>
+                                            <th class="py-2 px-3">Paid By</th>
+                                            <th class="py-2 px-3 text-right">Cost</th>
+                                            <th class="py-2 px-3 text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 text-sm">
+                                        ${tableRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ` : ''}
+                    `;
+                    containerEl.appendChild(monthSection);
+                });
+            }
+
+            const settlements = calculateBalances(activeExpenses);
+            settlementListEl.innerHTML = '';
+
+            if (activeExpenses.length === 0) {
+                settlementListEl.innerHTML = `<p class="text-slate-400 text-sm">No expenses to display.</p>`;
+            } else if (settlements.length === 0) {
+                settlementListEl.innerHTML = `
+                    <div class="p-3 bg-emerald-50 text-emerald-800 rounded-lg text-sm font-medium text-center border border-emerald-200">
+                        Everyone is completely settled up! 🎉⚔️
+                    </div>`;
+            } else {
+                settlements.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-800 space-y-2';
+                    
+                    const venmoUrl = s.toVenmo 
+                        ? `https://venmo.com/${encodeURIComponent(s.toVenmo)}?txn=pay&amount=${s.amount.toFixed(2)}&note=${encodeURIComponent('Roommate tab settlement')}`
+                        : '#';
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-uvaBlue">${escapeHtml(s.from)}</span> owes 
+                                <span class="font-bold text-uvaBlue">${escapeHtml(s.to)}</span>
+                            </div>
+                            <div class="font-extrabold text-base text-uvaOrange">
+                                $${s.amount.toFixed(2)}
+                            </div>
+                        </div>
+                        ${s.toVenmo ? `
+                            <a href="${venmoUrl}" target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-sky-500 hover:bg-sky-600 text-white font-bold py-1.5 px-3 rounded text-xs transition shadow-sm flex items-center justify-center gap-1">
+                                <span>Pay @${escapeHtml(s.toVenmo)} on Venmo</span>
+                                <span>↗</span>
+                            </a>
+                        ` : `
+                            <div class="text-xs text-slate-400 italic">No Venmo handle provided for ${escapeHtml(s.to)}</div>
+                        `}
+                    `;
+                    settlementListEl.appendChild(card);
+                });
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+    </script>
+</body>
+</html>
